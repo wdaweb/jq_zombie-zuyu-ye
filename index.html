@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet" />
+
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+
+  <!-- https://tenor.com/view/naruto-run-billy-srgrafo-chill-gif-21208422 gif圖檔 -->
+  <title>Document</title>
+  <style>
+    @font-face {
+      /* https://github.com/SolidZORO/zpix-pixel-font/blob/master/website/app.css */
+      font-family: zpix;
+      src: url(https://zpix.now.sh/zpix.woff2?v2021-03-21);
+    }
+
+    body {
+      background-color: rgb(1, 7, 41);
+    }
+
+    html,
+    body,
+    pre,
+    code,
+    kbd,
+    samp {
+      font-family: 'Press Start 2P', 'zpix';
+    }
+
+    #game-console {
+      display: block;
+      margin: auto;
+      position: relative;
+      width: 900px;
+      height: 600px;
+      background: url(./images/Game-console-bg.png) no-repeat;
+
+    }
+
+    #game {
+      width: 600px;
+      height: 355px;
+      top: 20%;
+      left: 16%;
+      background: url(./images/tumblr_pgtfv6Q8KO1xu7jxzo1_640.png);
+      overflow: hidden;
+      position: absolute;
+    }
+
+    #game img {
+      height: 150px;
+      position: absolute;
+    }
+
+    #game {
+      cursor: url(./images/cross.png) 50 50, auto;
+    }
+
+    p {
+      color: cornsilk;
+      text-align: center;
+    }
+
+    #btn {
+      position: absolute;
+      top: 85%;
+      left: 44%;
+    }
+
+    .say {
+      width: 50px;
+    }
+
+    #howtoplay {
+      width: 600px;
+      height: 355px;
+      top: 20%;
+      left: 32%;
+      position: absolute;
+      z-index: 999;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="howtoplay">
+    <div class="nes-container is-dark with-title">
+      <p class="title">遊戲說明:</p>
+      <p>淨化鬼魂 <img src="./images/tenor.gif" alt="鬼魂" class="say"> +1分</p>
+      <p>淨化骷顱頭 <img src="./images/tenor-spooky.gif" alt="骷顱頭" class="say"> +2分</p>
+      <p>淨化人類 <img src="./images/tenor-man.gif" alt="人類" class="say"> -5分!</p>
+      <p>使用十字架，點擊上面人物獲得分數。</p>
+    </div>
+  </div>
+
+  <div id="game-console">
+    <div id="game">
+
+    </div>
+    <div id="btn">
+      <button type="button" class="nes-btn is-error" id="btn-start">Start</button>
+    </div>
+  </div>
+
+  <p>分數: <span id="text-score">0</span> 分 </p>
+  <p>倒數計時: <span id="text-time">0</span> 秒</p>
+  <script src="../jquery-3.6.0.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+  <script>
+    // 分數
+    let score = 0
+    // 遊戲時間
+    let countdown = 30
+    // 倒數計時
+    let timer = 0
+
+    const move = (zb) => {
+      zb.stop().animate({
+        left: Math.round(Math.random() * 70) + '%',
+        top: Math.round(Math.random() * 70) + '%',
+        opacity: zb.css('opacity') > 0 ? 0 : 1
+      }, 2000, function () {
+        move(zb)
+      })
+    }
+
+
+    $('#btn-start').click(function () {
+      $(this).attr('disabled', true)
+
+      // 重設
+      score = 0
+      $('#text-score').text(score)
+      //剩餘幾秒
+      countdown = 10
+      $('#text-time').text(countdown)
+
+      timer = setInterval(() => {
+        // 倒數
+        countdown--
+        $('#text-time').text(countdown)
+
+
+        // 隨機產生鬼
+        let rand = Math.round(Math.random() * 10)
+        if (rand > 5 && $('#game img').length < 10) {
+          const zb = $(`<img src="./images/tenor.gif" alt="" style="left:${Math.round(Math.random() * 70)}%;top:${Math.round(Math.random() * 70)}%">`)
+          $('#game').append(zb)
+          move(zb)
+
+        }
+
+        let randman = Math.round(Math.random() * 5)
+        if (randman > 1 && $('#game img').length < 5) {
+          const zb = $(`<img src="./images/tenor-man.gif" alt="" style="left:${Math.round(Math.random() * 70)}%;top:${Math.round(Math.random() * 70)}%">`)
+          $('#game').append(zb)
+          move(zb)
+        }
+
+        let randspooky = Math.round(Math.random() * 5)
+        if (randspooky > 1 && $('#game img').length < 5) {
+          const zb = $(`<img src="./images/tenor-spooky.gif" alt="" style="left:${Math.round(Math.random() * 70)}%;top:${Math.round(Math.random() * 70)}%">`)
+          $('#game').append(zb)
+          move(zb)
+        }
+
+
+        if (countdown <= 0) {
+          clearInterval(timer)
+          Swal.fire({
+            icon: 'info',
+            title: '時間到',
+            text: `你得到 ${score} 分`
+          })
+          $('#game img').remove()
+          $(this).attr('disabled', false)
+        }
+      }, 1000);
+    })
+
+    $('#game').on('click', 'img', function () {
+      // 點擊人就減分
+      if ($(this).attr("src") == "./images/tenor-man.gif") {
+        let i = 5
+        score = score - i
+        $('#text-score').text(score)
+
+        $(this).stop().attr('src', './images/tenorangry.gif')
+      } else if ($(this).attr("src") == "./images/tenor-spooky.gif") {
+        $(this).stop().attr('src', './images/angelcat.png').animate({ top: '-=500px' }, 2000)
+        let i = 2
+        score = score + i
+        $('#text-score').text(score)
+      } else {
+        $(this).stop().attr('src', './images/angelheart.png').animate({ top: '-=500px' }, 2000)
+        // 忽略點擊事件、無法點擊和選取
+        $(this).css({
+          'user-select': 'none',
+          '-webkit-user-drag': 'none',
+          'pointer-events': 'none'
+        })
+        score++
+        $('#text-score').text(score)
+      }
+    })
+
+    //隱藏說明
+    $("#btn-start").click(function () {
+      $("#howtoplay").hide();
+    })
+
+
+  </script>
+</body>
+
+</html>
